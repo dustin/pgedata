@@ -22,18 +22,18 @@ import PGE
 
 process :: (Text -> Maybe Text) -> Text -> [V.Vector Text] -> [Text]
 process tparse site rows =
-  (filter (/= "") . map rewrite . filter matches) rows
+  (concatMap rewrite . filter matches) rows
 
   where matches :: V.Vector Text -> Bool
         matches r =
           "usage" `isSuffixOf` (V.head r)
 
-        rewrite :: V.Vector Text -> Text
+        rewrite :: V.Vector Text -> [Text]
         rewrite r =
           case tparse (ts (etype r) r) of
-            Nothing -> ""
-            Just t -> "energy,site=" <> site <> ",energy_type=" <> etype r <> ",value_type=usage " <>
-                       "value=" <> val (etype r) r <> " " <> t
+            Nothing -> []
+            Just t -> ["energy,site=" <> site <> ",energy_type=" <> etype r <> ",value_type=usage " <>
+                        "value=" <> val (etype r) r <> " " <> t]
 
         etype :: V.Vector Text -> Text
         etype r
