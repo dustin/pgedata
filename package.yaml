@@ -27,10 +27,26 @@ library:
   dependencies:
     - time
     - text
+    - bytestring
 
 executables:
   pgedata:
-    main:                Main.hs
+    main:                pgedata.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -Wall
+    dependencies:
+    - pgedata
+    - vector
+    - time
+    - bytestring
+    - cassava
+    - text
+  solardata:
+    main:                solardata.hs
     source-dirs:         app
     ghc-options:
     - -threaded

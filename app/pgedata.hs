@@ -5,11 +5,9 @@ module Main where
 import System.Environment (getArgs)
 import Data.Csv (HasHeader(..), decode)
 import Data.Time
-import Data.Text (Text, unpack, pack, isSuffixOf, isInfixOf)
+import Data.Text (Text, pack, isSuffixOf, isInfixOf)
 import qualified Data.ByteString.Lazy as BL
-import qualified Data.ByteString.Char8 as BC
 import qualified Data.Vector as V
-import Data.List (intercalate)
 
 import PGE
 
@@ -22,8 +20,8 @@ import PGE
 -- print "energy,site=%s,energy_type=gas,value_type=usage value=%s %s" % (site, row[2], timestamp)
 -- print "energy,site=%s,energy_type=electric,value_type=usage value=%s %s" % (site, row[4], timestamp)
 
-process :: TimeZone -> Text -> [V.Vector Text] -> [Text]
-process tz site rows =
+process :: (Text -> Maybe Text) -> Text -> [V.Vector Text] -> [Text]
+process tparse site rows =
   (filter (/= "") . map rewrite . filter matches) rows
 
   where matches :: V.Vector Text -> Bool
@@ -32,7 +30,7 @@ process tz site rows =
 
         rewrite :: V.Vector Text -> Text
         rewrite r =
-          case tsToUnix tz (ts (etype r) r) of
+          case tparse (ts (etype r) r) of
             Nothing -> ""
             Just t -> "energy,site=" <> site <> ",energy_type=" <> etype r <> ",value_type=usage " <>
                        "value=" <> val (etype r) r <> " " <> t
@@ -50,9 +48,6 @@ process tz site rows =
         ts "electric" r = (r V.! 1) <> " " <> r V.! 2
         ts _ _ = undefined
 
-encode :: [Text] -> BL.ByteString
-encode rows = BL.fromStrict $ BC.pack $ intercalate "\n" $ (map unpack) rows
-
 main :: IO ()
 main = do
   [env] <- getArgs
@@ -60,4 +55,4 @@ main = do
   csvData <- BL.getContents
   case decode NoHeader csvData :: Either String (V.Vector (V.Vector Text)) of
     Left err -> fail (show err)
-    Right v -> (BL.putStr . encode) $ process tz (pack env) (V.toList v)
+    Right v -> (BL.putStr . encode) $ process (tsToUnix tz "%Y-%-m-%-d %H:%M") (pack env) (V.toList v)
