@@ -55,4 +55,4 @@ main = do
   csvData <- BL.getContents
   case decode NoHeader csvData :: Either String (V.Vector (V.Vector Text)) of
     Left err -> fail (show err)
-    Right v -> (BL.putStr . encode) $ process (tsToUnix tz "%Y-%-m-%-d %H:%M") (pack env) (V.toList v)
+    Right v -> writeLines $ process (tsToUnix tz "%Y-%-m-%-d %H:%M") (pack env) (V.toList v)

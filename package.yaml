@@ -27,7 +27,6 @@ library:
   dependencies:
     - time
     - text
-    - bytestring
 
 executables:
   pgedata:
