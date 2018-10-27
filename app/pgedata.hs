@@ -26,7 +26,7 @@ main = do
         rewrite site tparse r =
           case tparse (ts (etype r) r) of
             Nothing -> []
-            Just t -> ["enbergy,site=" <> site <> ",energy_type=" <> etype r <> ",value_type=usage " <>
+            Just t -> ["energy,site=" <> site <> ",energy_type=" <> etype r <> ",value_type=usage " <>
                         "value=" <> val (etype r) r <> " " <> t]
 
         etype :: V.Vector Text -> Text
