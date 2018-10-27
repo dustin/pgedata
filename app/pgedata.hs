@@ -21,8 +21,8 @@ import PGE
 -- print "energy,site=%s,energy_type=electric,value_type=usage value=%s %s" % (site, row[4], timestamp)
 
 process :: (Text -> Maybe Text) -> Text -> [V.Vector Text] -> [Text]
-process tparse site rows =
-  (concatMap rewrite . filter matches) rows
+process tparse site =
+  concatMap rewrite . filter matches
 
   where matches :: V.Vector Text -> Bool
         matches r =
