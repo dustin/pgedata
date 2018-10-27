@@ -15,10 +15,6 @@ import PGE
 -- 0                   1            2                                    3    4     5    6
 -- 2018-10-08T07:30:00,"Production",22ab5fe1-00e2-4719-89f0-2e3941b20753,0.00,17.18,0.92,244.60
 
-
--- print "energy,site=%s,energy_type=gas,value_type=usage value=%s %s" % (site, row[2], timestamp)
--- print "energy,site=%s,energy_type=electric,value_type=usage value=%s %s" % (site, row[4], timestamp)
-
 process :: (Text -> Maybe Text) -> Text -> [V.Vector Text] -> [Text]
 process tparse site =
   concatMap rewrite . filter matches
