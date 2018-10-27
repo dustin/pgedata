@@ -27,6 +27,9 @@ library:
   dependencies:
     - time
     - text
+    - bytestring
+    - cassava
+    - vector
 
 executables:
   pgedata:
@@ -40,9 +43,6 @@ executables:
     dependencies:
     - pgedata
     - vector
-    - time
-    - bytestring
-    - cassava
     - text
   solardata:
     main:                solardata.hs
@@ -55,9 +55,6 @@ executables:
     dependencies:
     - pgedata
     - vector
-    - time
-    - bytestring
-    - cassava
     - text
 
 tests:
