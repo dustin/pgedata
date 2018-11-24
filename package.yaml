@@ -56,6 +56,17 @@ executables:
     - pgedata
     - vector
     - text
+  solarurls:
+    main:                solarurls.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    - -Wall
+    dependencies:
+    - time
+    - extra
 
 tests:
   pgedata-test:
