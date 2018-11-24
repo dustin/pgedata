@@ -18,7 +18,7 @@ tsToUnix tz fmt s =
 
 type FilterFun = (V.Vector Text -> Bool)
 
-type RewriteFun = (Text -> Maybe Text) -> (V.Vector Text) -> [Text]
+type RewriteFun = (Text -> Maybe Text) -> V.Vector Text -> [Text]
 
 process :: String -> FilterFun -> RewriteFun -> IO ()
 process tfmt ff rf = do

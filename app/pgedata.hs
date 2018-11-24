@@ -20,7 +20,7 @@ main = do
   process "%Y-%-m-%-d %H:%M" matches (rewrite (pack site))
 
   where matches :: FilterFun
-        matches r = "usage" `isSuffixOf` (V.head r)
+        matches r = "usage" `isSuffixOf` V.head r
 
         rewrite :: Text -> RewriteFun
         rewrite site tparse r =
