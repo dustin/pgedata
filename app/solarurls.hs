@@ -6,13 +6,10 @@ import Data.List.Extra (chunksOf)
 import Data.Time.Clock (getCurrentTime, utctDay)
 import System.Environment (getArgs)
 
-down :: Enum a => a -> [a]
-down d = enumFromThen d (pred d)
-
 main :: IO ()
 main = do
-  [uid] <- getArgs
-  days <- map (liftA2 (,) last head) . chunksOf 3 . take 14 . down . pred . utctDay <$> getCurrentTime
+  [start, uid] <- getArgs
+  days <- map (liftA2 (,) head last) . chunksOf 3 . enumFromTo (read start) . utctDay <$> getCurrentTime
   forM_ days $ \(s,e) ->
     putStrLn $ mconcat [
       "https://mysolarcity.com/solarcity-api/powerguide/v1.0/installations/", uid,
