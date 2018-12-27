@@ -24,12 +24,17 @@ dependencies:
 
 library:
   source-dirs: src
+  ghc-options:
+    - -Wall
   dependencies:
     - time
     - text
     - bytestring
     - cassava
     - vector
+    - influxdb
+    - lens
+    - containers
 
 executables:
   pgedata:
@@ -67,6 +72,7 @@ executables:
     dependencies:
     - time
     - extra
+    - pgedata
 
 tests:
   pgedata-test:
