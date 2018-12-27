@@ -10,9 +10,7 @@ module DB (
 
 import           Control.Lens
 import           Control.Monad            (when)
-import           Data.Char                (toLower)
-import           Data.String              (fromString)
-import           Data.Text                (Text, unpack)
+import           Data.Text                (Text, pack, toLower, unpack)
 import           Data.Time
 import qualified Data.Vector              as V
 import           Database.InfluxDB
@@ -21,7 +19,18 @@ import           Database.InfluxDB.Types  (Nullability (..))
 
 data EnergyType = Electric | Gas | Solar deriving (Eq, Show)
 
+energy_type :: Text -> EnergyType
+energy_type "electric" = Electric
+energy_type "gas"      = Gas
+energy_type "solar"    = Solar
+energy_type x          = error ("unknown energy type: " <> unpack x)
+
 data Site = SJ | Oro deriving (Show)
+
+site :: Text -> Site
+site "oro" = Oro
+site "sj"  = SJ
+site x     = error ("unknown site: " <> unpack x)
 
 data Lasts = Lasts UTCTime EnergyType Site deriving (Show)
 
@@ -31,18 +40,6 @@ instance QueryResults Lasts where
     let Just et = energy_type <$> m ^.at "energy_type"
         Just s  = site <$> m ^.at "site"
     pure $ Lasts time et s
-
-      where
-        site :: Text -> Site
-        site "oro" = Oro
-        site "sj"  = SJ
-        site x     = error ("unknown site: " <> unpack x)
-
-        energy_type :: Text -> EnergyType
-        energy_type "electric" = Electric
-        energy_type "gas"      = Gas
-        energy_type "solar"    = Solar
-        energy_type x          = error ("unknown energy type: " <> unpack x)
 
 
 lastTimestamps :: QueryParams -> IO (V.Vector Lasts)
@@ -71,7 +68,7 @@ lastTimestamp p et s = do
 
   where
     toField :: Show a => a -> Field 'Nullable
-    toField = fromString . map toLower . show
+    toField = FieldString . toLower . pack . show
 
 toLocal :: UTCTime -> IO LocalTime
 toLocal ts = do

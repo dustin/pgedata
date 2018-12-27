@@ -61,6 +61,10 @@ executables:
     - pgedata
     - vector
     - text
+    - time
+    - containers
+    - influxdb
+    - lens
   solarurls:
     main:                solarurls.hs
     source-dirs:         app

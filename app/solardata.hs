@@ -1,33 +1,44 @@
-{-# LANGUAGE OverloadedStrings, OverloadedLists #-}
+{-# LANGUAGE OverloadedLists   #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module Main where
 
-import System.Environment (getArgs)
-import Data.Text (Text, pack)
-import qualified Data.Vector as V
+import           Control.Lens
+import qualified Data.Map.Strict    as Map
+import           Data.Text          (Text, unpack)
+import           Data.Time          (UTCTime)
+import qualified Data.Vector        as V
+import           Database.InfluxDB
+import           System.Environment (getArgs)
+import           System.IO          (IOMode (..), withFile)
 
-import PGE
+import           PGE
 
--- "Timestamp","Type","Device GUID","Energy In Interval (kWh)","Lifetime Cumulative Energy (kWh)","Current","Voltage"
--- 0                   1            2                                    3    4     5    6
--- 2018-10-08T07:30:00,"Production",22ab5fe1-00e2-4719-89f0-2e3941b20753,0.00,17.18,0.92,244.60
+-- withFile :: FilePath -> IOMode -> (Handle -> IO r) -> IO r
+fileToLines :: String  -> IO [Line UTCTime]
+fileToLines fn = withFile fn ReadMode $ \h -> do
+  (Right csvd) <- parseCSV h
+  tparse <- mkTimeParser "%Y-%-m-%-dT%H:%M:00"
+  pure $ concatMap (row tparse) csvd
+
+    where
+      row :: (Text -> Maybe UTCTime) -> V.Vector Text -> [Line UTCTime]
+      row tparse r = case tparse (V.head r) of
+                       Nothing -> []
+                       t       -> [mkLine 3 t "production",
+                                   mkLine 5 t "current",
+                                   mkLine 6 t "voltage"]
+
+        where
+          mkLine p t vt = Line "energy" (Map.fromList [("site", "sj"),
+                                                       ("energy_type", "solar"),
+                                                       ("value_type", vt)])
+                           (Map.singleton "value" (FieldFloat . read.unpack $ r V.! p)) t
 
 main :: IO ()
 main = do
-  [site] <- getArgs
-  process "%Y-%-m-%-dT%H:%M:00" matches (rewrite (pack site))
+  fns <- getArgs
+  rose <- mconcat <$> traverse fileToLines fns
+  let wp = writeParams "pge" & precision .~ Minute
 
-  where matches :: FilterFun
-        matches r = r V.! 1 == "Production"
-
-        rewrite :: Text -> RewriteFun
-        rewrite site tparse r =
-          case tparse (V.head r) of
-            Nothing -> []
-            Just t -> ["energy,site=" <> site <> ",energy_type=solar,value_type=production " <>
-                        "value=" <> r V.! 3 <> " " <> t,
-                        "energy,site=" <> site <> ",energy_type=solar,value_type=current " <>
-                        "value=" <> r V.! 5 <> " " <> t,
-                        "energy,site=" <> site <> ",energy_type=solar,value_type=voltage " <>
-                        "value=" <> r V.! 6 <> " " <> t
-                      ]
+  writeBatch wp rose
