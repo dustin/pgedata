@@ -14,7 +14,6 @@ import           System.IO          (IOMode (..), withFile)
 
 import           PGE
 
--- withFile :: FilePath -> IOMode -> (Handle -> IO r) -> IO r
 fileToLines :: String  -> IO [Line UTCTime]
 fileToLines fn = withFile fn ReadMode $ \h -> do
   (Right csvd) <- parseCSV h
