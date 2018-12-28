@@ -29,7 +29,7 @@ import           PGE
 -- Natural gas usage,2016-01-10,3.13,therms,$4.09,
 
 acctMap :: Map Text Site
-acctMap = Map.fromList [("8500", Oro), ("5074", SJ), ("8908", SJ)]
+acctMap = Map.fromList [("8500_", Oro), ("5074_", SJ), ("8908_", SJ)]
 
 processIncr :: String -> B.ByteString -> IO [Line UTCTime]
 processIncr fn d = do
