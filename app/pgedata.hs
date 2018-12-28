@@ -70,9 +70,11 @@ processIncr fn d = do
 
 doFile :: String -> IO [[Line UTCTime]]
 doFile path = do
-  fns <- withArchive path (Map.keys <$> getEntries)
-  vs <- withArchive path (mapM getEntry fns)
-  zipWithM processIncr (unEntrySelector <$> fns) vs
+  (fns,vs) <- withArchive path $ do
+    fns <- Map.keys <$> getEntries
+    vs <- mapM getEntry fns
+    pure (unEntrySelector <$> fns, vs)
+  zipWithM processIncr fns vs
 
 main :: IO ()
 main = do
