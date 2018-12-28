@@ -81,19 +81,22 @@ toLocal ts = do
   tz <- getCurrentTimeZone
   pure $ utcToLocalTime tz ts
 
+dbName :: Database
+dbName = "pge"
+
 findQueryHost :: IO Server
 findQueryHost = do
   esn <- race (tryHost "localhost") (tryHost "eve")
   let sn = case esn of
              Left _  -> "localhost"
              Right _ -> "eve"
-  let qp = queryParams "pge" ^. server
+  let qp = queryParams dbName ^. server
   pure (qp & host .~ sn)
 
   where
     tryHost :: Text -> IO ()
     tryHost h = do
-      let p = queryParams "pge" & server.host .~ h
+      let p = queryParams dbName & server.host .~ h
       _ <- catch (query p "show databases" :: IO (V.Vector Void)) (\e -> threadDelay 100000 >> mempty
                                                                     (e :: SomeException))
       pure ()
@@ -101,9 +104,9 @@ findQueryHost = do
 myQueryParams :: IO QueryParams
 myQueryParams = do
   h <- findQueryHost
-  pure $ queryParams "pge" & server .~ h
+  pure $ queryParams dbName & server .~ h
 
 myWriteParams :: IO WriteParams
 myWriteParams = do
   h <- findQueryHost
-  pure $ writeParams "pge" & server .~ h & precision .~ Minute
+  pure $ writeParams dbName & server .~ h & precision .~ Minute
