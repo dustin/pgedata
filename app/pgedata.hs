@@ -4,7 +4,6 @@
 module Main where
 
 import           Codec.Archive.Zip
-import           Control.Lens
 import           Control.Monad      (zipWithM)
 import qualified Data.ByteString    as B
 import           Data.Char          (toLower)
@@ -81,5 +80,5 @@ main = do
   fns <- getArgs
   lineses <- mapM doFile fns
   let rose = (mconcat . mconcat) lineses
-  let wp = writeParams "pge" & precision .~ Minute
+  wp <- myWriteParams
   writeBatch wp rose

@@ -35,6 +35,7 @@ library:
     - influxdb
     - lens
     - containers
+    - async
 
 executables:
   pgedata:

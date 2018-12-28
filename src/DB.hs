@@ -5,14 +5,20 @@ module DB (
   EnergyType(..), Site(..), Lasts(..),
   lastTimestamps, lastTimestamp,
   toLocal,
-  queryParams,
+  myQueryParams, myWriteParams,
+  findQueryHost,
+  QueryParams, WriteParams
 ) where
 
+import           Control.Concurrent       (threadDelay)
+import           Control.Concurrent.Async (race)
+import           Control.Exception        (SomeException (..), catch)
 import           Control.Lens
 import           Control.Monad            (when)
 import           Data.Text                (Text, pack, toLower, unpack)
 import           Data.Time
 import qualified Data.Vector              as V
+import           Data.Void                (Void)
 import           Database.InfluxDB
 import           Database.InfluxDB.Format (field)
 import           Database.InfluxDB.Types  (Nullability (..))
@@ -74,3 +80,30 @@ toLocal :: UTCTime -> IO LocalTime
 toLocal ts = do
   tz <- getCurrentTimeZone
   pure $ utcToLocalTime tz ts
+
+findQueryHost :: IO Server
+findQueryHost = do
+  esn <- race (tryHost "localhost") (tryHost "eve")
+  let sn = case esn of
+             Left _  -> "localhost"
+             Right _ -> "eve"
+  let qp = queryParams "pge" ^. server
+  pure (qp & host .~ sn)
+
+  where
+    tryHost :: Text -> IO ()
+    tryHost h = do
+      let p = queryParams "pge" & server.host .~ h
+      _ <- catch (query p "show databases" :: IO (V.Vector Void)) (\e -> threadDelay 100000 >> mempty
+                                                                    (e :: SomeException))
+      pure ()
+
+myQueryParams :: IO QueryParams
+myQueryParams = do
+  h <- findQueryHost
+  pure $ queryParams "pge" & server .~ h
+
+myWriteParams :: IO WriteParams
+myWriteParams = do
+  h <- findQueryHost
+  pure $ writeParams "pge" & server .~ h & precision .~ Minute

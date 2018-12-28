@@ -3,7 +3,6 @@
 
 module Main where
 
-import           Control.Lens
 import qualified Data.Map.Strict    as Map
 import           Data.Text          (Text, unpack)
 import           Data.Time          (UTCTime)
@@ -12,6 +11,7 @@ import           Database.InfluxDB
 import           System.Environment (getArgs)
 import           System.IO          (IOMode (..), withFile)
 
+import           DB                 (myWriteParams)
 import           PGE
 
 fileToLines :: String  -> IO [Line UTCTime]
@@ -38,6 +38,6 @@ main :: IO ()
 main = do
   fns <- getArgs
   rose <- mconcat <$> traverse fileToLines fns
-  let wp = writeParams "pge" & precision .~ Minute
+  wp <- myWriteParams
 
   writeBatch wp rose

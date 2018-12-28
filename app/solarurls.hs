@@ -7,8 +7,8 @@ import           Data.List.Extra     (chunksOf)
 import           Data.Time.Clock     (getCurrentTime, utctDay)
 import           System.Environment  (getArgs)
 
-import           DB                  (EnergyType (..), Site (..), lastTimestamp,
-                                      queryParams, toLocal)
+import           DB                  (EnergyType (..), QueryParams, Site (..),
+                                      lastTimestamp, myQueryParams, toLocal)
 
 mkSolarURLs :: (Show a, Enum a) => String -> a -> a -> [String]
 mkSolarURLs uid f t =
@@ -18,8 +18,8 @@ mkSolarURLs uid f t =
             "/summary?StartTime=", show s, "T00:00:00&EndTime=",
             show e, "T23:59:59&Period=QuarterHour"]) days
 
-main :: IO ()
-main = do
+showStuff :: QueryParams -> IO ()
+showStuff p = do
   [uid] <- getArgs
   lastd <- pred . utctDay <$> lastTimestamp p Solar SJ
   today <- utctDay <$> getCurrentTime
@@ -33,7 +33,9 @@ main = do
   putStrLn $ "Last from Oroville: " <> ots
 
   where
-    p = queryParams "pge"
     ts :: EnergyType -> Site -> IO String
     ts t s = lastTimestamp p t s >>= toLocal >>= \s' -> pure $ show s'
 
+
+main :: IO ()
+main = showStuff =<< myQueryParams
