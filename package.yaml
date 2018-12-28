@@ -48,7 +48,13 @@ executables:
     dependencies:
     - pgedata
     - vector
+    - bytestring
     - text
+    - time
+    - containers
+    - influxdb
+    - lens
+    - zip
   solardata:
     main:                solardata.hs
     source-dirs:         app

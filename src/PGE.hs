@@ -3,6 +3,7 @@
 module PGE where
 
 import           Control.Monad        (mapM_)
+import qualified Data.ByteString      as B
 import qualified Data.ByteString.Lazy as BL
 import           Data.Csv             (HasHeader (..), decode)
 import           Data.Text            (Text, pack, unpack)
@@ -22,6 +23,9 @@ type RewriteFun = (Text -> Maybe Text) -> V.Vector Text -> [Text]
 
 parseCSV :: Handle -> IO (Either String (V.Vector (V.Vector Text)))
 parseCSV h = decode NoHeader <$> BL.hGetContents h
+
+parseCSV' :: B.ByteString -> Either String (V.Vector (V.Vector Text))
+parseCSV' = decode NoHeader . BL.fromStrict
 
 mkTimeParser :: String -> IO (Text -> Maybe UTCTime)
 mkTimeParser fmt = do

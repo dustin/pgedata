@@ -5,7 +5,7 @@ module DB (
   EnergyType(..), Site(..), Lasts(..),
   lastTimestamps, lastTimestamp,
   toLocal,
-  queryParams
+  queryParams,
 ) where
 
 import           Control.Lens
