@@ -22,7 +22,7 @@ showStuff :: QueryParams -> IO ()
 showStuff p = do
   [uid] <- getArgs
   lastd <- pred . utctDay <$> lastTimestamp p Solar SJ
-  today <- utctDay <$> getCurrentTime
+  today <- pred . utctDay <$> getCurrentTime
   mapM_ putStrLn $ mkSolarURLs uid lastd today
 
   putStrLn ""
