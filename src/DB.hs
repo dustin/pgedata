@@ -97,7 +97,7 @@ findQueryHost = do
     tryHost :: Text -> IO ()
     tryHost h = do
       let p = queryParams dbName & server.host .~ h
-      _ <- catch (query p "show databases" :: IO (V.Vector Void)) (\e -> threadDelay 100000 >> mempty
+      _ <- catch (query p "show databases" :: IO (V.Vector Void)) (\e -> threadDelay 5000000 >> mempty
                                                                     (e :: SomeException))
       pure ()
 
